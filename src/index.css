@@ -1,0 +1,449 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-bebas: 'Bebas Neue', sans-serif;
+    --font-display: 'Bebas Neue', 'Raleway', sans-serif;
+    --font-railway: 'Raleway', 'Railway', sans-serif;
+    --font-syne: 'Syne', sans-serif;
+    --font-sans: 'Manrope', sans-serif;
+    --font-mono: 'Space Mono', monospace;
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    background-color: #080808;
+    color: #F2F2F2;
+  }
+
+  h1, h2 {
+    font-family: 'Bebas Neue', 'Raleway', sans-serif;
+    font-weight: 700;
+  }
+}
+
+.font-bebas {
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.font-railway {
+  font-family: var(--font-railway);
+}
+
+.font-syne {
+  font-family: var(--font-syne);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Background textures & Grid lines */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.bg-grid-pattern-dark-on-light {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+}
+
+/* Concrete & Noise Textures */
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+.noise-overlay-heavy {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.12'/%3E%3C/svg%3E");
+}
+
+/* Paper grain texture background */
+.paper-texture {
+  background-color: #EAE8E3;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoise)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Red Tape Graphic Overlay */
+.tape-overlay {
+  position: relative;
+}
+.tape-overlay::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  right: -15px;
+  width: 90px;
+  height: 28px;
+  background-color: rgba(215, 38, 38, 0.85);
+  transform: rotate(-12deg);
+  z-index: 20;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D72626;
+}
+
+/* Crosshair overlay elements */
+.crosshair-target {
+  position: relative;
+}
+.crosshair-target::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #D72626;
+  opacity: 0.6;
+}
+
+/* Red accent stroke */
+.border-signal-red {
+  border-color: #D72626;
+}
+
+.bg-signal-red {
+  background-color: #D72626;
+}
+
+.text-signal-red {
+  color: #D72626;
+}
+
+/* Smooth 5s opacity pulse for unclicked interactive controls */
+@keyframes unclickedSmoothPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.42;
+  }
+}
+
+.animate-unclicked-pulse {
+  animation: unclickedSmoothPulse 5s ease-in-out infinite;
+}
+
+.animate-unclicked-pulse:hover {
+  animation-play-state: paused;
+  opacity: 1 !important;
+}
+
+/* ==========================================================
+   OFF-WHITE MODE: Replacing Black with #e1ddc8 Warm Canvas & Darker Warm Shade (#25231b), with White Text for Black/Dark Elements
+   ========================================================== */
+
+.light-mode {
+  background-color: #e1ddc8 !important; /* Base warm off-white background */
+  color: #25231b !important; /* Dark shade of off-white palette */
+}
+
+body.light-mode {
+  background-color: #e1ddc8 !important;
+  color: #25231b !important;
+}
+
+/* Custom Scrollbar in Off-White Mode */
+.light-mode::-webkit-scrollbar-track,
+.light-mode ::-webkit-scrollbar-track {
+  background: #D4CFBA !important;
+}
+.light-mode::-webkit-scrollbar-thumb,
+.light-mode ::-webkit-scrollbar-thumb {
+  background: #25231b !important; /* Dark shade of off-white palette */
+}
+.light-mode::-webkit-scrollbar-thumb:hover,
+.light-mode ::-webkit-scrollbar-thumb:hover {
+  background: #3d392e !important;
+}
+
+/* 1. Background Inversion & Off-White replacements (#e1ddc8 canvas, #d6caa8 browner off-white containers) */
+.light-mode .bg-\[\#080808\],
+.light-mode .bg-black,
+.light-mode .bg-\[\#0a0a0a\] {
+  background-color: #e1ddc8 !important; /* Main off-white canvas */
+}
+
+.light-mode .bg-\[\#080808\]\/90,
+.light-mode .bg-black\/90,
+.light-mode .bg-black\/80 {
+  background-color: rgba(225, 221, 200, 0.94) !important;
+}
+
+/* Framed containers and primary panels: Slightly browner off-white */
+.light-mode .bg-\[\#050505\],
+.light-mode .bg-zinc-950,
+.light-mode .bg-\[\#121212\],
+.light-mode .bg-\[\#111111\],
+.light-mode .bg-zinc-900 {
+  background-color: #d6caa8 !important; /* Browner off-white container */
+}
+
+/* Nested sub-containers, chips & secondary panels */
+.light-mode .bg-zinc-900\/50,
+.light-mode .bg-zinc-900\/60,
+.light-mode .bg-zinc-900\/80,
+.light-mode .bg-zinc-950\/50,
+.light-mode .bg-zinc-950\/80,
+.light-mode .bg-zinc-800 {
+  background-color: #c9bc96 !important; /* Slightly deeper browner off-white panel / chip */
+}
+
+/* 2. Inverted White & Dark accent blocks to the Dark Shade of Off-White (#25231b) with White Text */
+.light-mode .bg-white {
+  background-color: #25231b !important; /* Dark shade of off-white palette */
+  color: #FFFFFF !important; /* Crisp white text */
+}
+
+.light-mode .bg-white\/90 {
+  background-color: rgba(37, 35, 27, 0.92) !important;
+  color: #FFFFFF !important;
+}
+
+.light-mode .bg-white\/10 {
+  background-color: rgba(37, 35, 27, 0.08) !important;
+}
+
+.light-mode .bg-white\/5 {
+  background-color: rgba(37, 35, 27, 0.04) !important;
+}
+
+/* 3. Text color rules in Off-White mode */
+.light-mode .text-white {
+  color: #25231b !important; /* Main headings / text on canvas adopt dark shade of off-white */
+}
+
+.light-mode .text-\[\#F2F2F2\] {
+  color: #25231b !important;
+}
+
+.light-mode .text-zinc-100 {
+  color: #2a271f !important;
+}
+
+.light-mode .text-zinc-200 {
+  color: #38342a !important;
+}
+
+.light-mode .text-zinc-300 {
+  color: #484437 !important;
+}
+
+.light-mode .text-zinc-400 {
+  color: #5c5747 !important;
+}
+
+.light-mode .text-zinc-500 {
+  color: #6e6856 !important;
+}
+
+.light-mode .text-zinc-600 {
+  color: #827b68 !important;
+}
+
+/* Black text inverted to crisp White */
+.light-mode .text-black,
+.light-mode .text-\[\#080808\],
+.light-mode .text-\[\#0A0A0A\],
+.light-mode .text-\[\#000000\] {
+  color: #FFFFFF !important; /* Invert black text to white */
+}
+
+/* Specific button / card text on dark shade backgrounds */
+.light-mode .bg-\[\#25231b\] .text-white,
+.light-mode .bg-white .text-white,
+.light-mode .bg-white span,
+.light-mode .bg-white h2,
+.light-mode .bg-white h3,
+.light-mode .bg-white p {
+  color: #FFFFFF !important;
+}
+
+/* 4. Hover states in Off-White mode */
+.light-mode .hover\:text-white:hover {
+  color: #25231b !important;
+}
+
+.light-mode .hover\:bg-white:hover {
+  background-color: #25231b !important;
+  color: #FFFFFF !important;
+}
+
+.light-mode .hover\:bg-zinc-900:hover {
+  background-color: #DAD5BF !important;
+}
+
+.light-mode .hover\:bg-zinc-800:hover {
+  background-color: #CDC8B1 !important;
+}
+
+/* 5. Borders in Off-White Mode: Dark shade strokes on off-white */
+.light-mode .border-zinc-800,
+.light-mode .border-zinc-900,
+.light-mode .border-zinc-700,
+.light-mode .border-white\/10,
+.light-mode .border-white\/20,
+.light-mode .border-\[\#1A1A1A\],
+.light-mode .border-\[\#080808\] {
+  border-color: rgba(37, 35, 27, 0.22) !important;
+}
+
+.light-mode .border-zinc-800\/80 {
+  border-color: rgba(37, 35, 27, 0.16) !important;
+}
+
+/* 6. Gradients & Grid Patterns in Off-White Mode */
+.light-mode .bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(37, 35, 27, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 35, 27, 0.08) 1px, transparent 1px) !important;
+}
+
+.light-mode .from-\[\#080808\],
+.light-mode .from-black {
+  --tw-gradient-from: #d6caa8 !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(214, 202, 168, 0)) !important;
+}
+
+.light-mode .to-\[\#080808\],
+.light-mode .to-black {
+  --tw-gradient-to: #d6caa8 !important;
+}
+
+.light-mode .from-zinc-900 {
+  --tw-gradient-from: #d6caa8 !important;
+}
+
+.light-mode .to-zinc-900 {
+  --tw-gradient-to: #d6caa8 !important;
+}
+
+/* 7. Modal & Lightbox Overlays */
+.light-mode .bg-black\/95 {
+  background-color: rgba(225, 221, 200, 0.98) !important;
+}
+
+.light-mode .bg-black\/90 {
+  background-color: rgba(225, 221, 200, 0.94) !important;
+}
+
+.light-mode .bg-black\/80,
+.light-mode .bg-black\/75 {
+  background-color: rgba(225, 221, 200, 0.88) !important;
+}
+
+/* 8. RED REPLACED WITH DARK SHADE OF OFF-WHITE (#25231b) & WHITE TEXT */
+.light-mode .text-\[\#D72626\],
+.light-mode .text-signal-red {
+  color: #25231b !important; /* Dark shade of off-white palette */
+}
+
+.light-mode .bg-\[\#D72626\],
+.light-mode .bg-signal-red {
+  background-color: #25231b !important;
+  color: #FFFFFF !important; /* White text on dark accent background */
+}
+
+.light-mode .bg-\[\#D72626\]\/80,
+.light-mode .bg-\[\#D72626\]\/90 {
+  background-color: rgba(37, 35, 27, 0.9) !important;
+  color: #FFFFFF !important;
+}
+
+.light-mode .bg-\[\#D72626\]\/10,
+.light-mode .bg-\[\#D72626\]\/20 {
+  background-color: rgba(37, 35, 27, 0.08) !important;
+}
+
+.light-mode .border-\[\#D72626\],
+.light-mode .border-signal-red {
+  border-color: #25231b !important;
+}
+
+.light-mode .border-\[\#D72626\]\/40,
+.light-mode .border-\[\#D72626\]\/50,
+.light-mode .border-\[\#D72626\]\/60 {
+  border-color: rgba(37, 35, 27, 0.45) !important;
+}
+
+.light-mode .hover\:bg-\[\#D72626\]:hover {
+  background-color: #25231b !important;
+  color: #FFFFFF !important;
+}
+
+.light-mode .hover\:border-\[\#D72626\]:hover {
+  border-color: #25231b !important;
+}
+
+.light-mode .hover\:text-\[\#D72626\]:hover {
+  color: #25231b !important;
+}
+
+.light-mode .tape-overlay::before {
+  background-color: rgba(37, 35, 27, 0.88) !important;
+}
+
+.light-mode .crosshair-target::after {
+  color: #25231b !important;
+}
+
+/* Custom Cursor in Light Mode (Dark shade focal dot & crosshair) */
+.light-mode .custom-cursor-dot,
+.light-mode .custom-cursor-crosshair {
+  background-color: #25231b !important;
+  border-color: #25231b !important;
+}
+
+/* Brand Assets / White RXSTFXL SVG inverts to dark shade in off-white mode */
+.light-mode img[src*="RXSTFXL%20LOGO"],
+.light-mode img[src*="RXSTFXL LOGO"],
+.light-mode img[src*="rxstfxl-logo"] {
+  filter: invert(1) brightness(0.2) sepia(0.2) saturate(2) hue-rotate(15deg) !important;
+}
+
+/* Print Media Query for Official Invoice */
+@media print {
+  header, footer, #project-popup-overlay, .custom-cursor-dot, .custom-cursor-crosshair, nav, button {
+    display: none !important;
+  }
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #contact {
+    padding: 0 !important;
+    border: none !important;
+    background: #ffffff !important;
+  }
+  .bg-grid-pattern, .bg-grid-pattern-dark-on-light {
+    background-image: none !important;
+  }
+}
+
+
