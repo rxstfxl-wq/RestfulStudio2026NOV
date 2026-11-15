@@ -355,6 +355,8 @@ export default function App() {
 
           <main className="relative z-10 flex-1">
             <Hero
+              projects={visibleProjects}
+              onSelectProject={handleSelectProject}
               onExploreClick={() => {
                 const el = document.getElementById('project-grid-section');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
