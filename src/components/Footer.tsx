@@ -40,22 +40,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Technical Data Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-zinc-400 text-[11px]">
-          <div>
-            <span className="text-zinc-600 block uppercase text-[9px]">LOCATION COORDINATES:</span>
-            <span className="text-white">33.9249° S, 18.4241° E [CAPE TOWN]</span>
-          </div>
-
-          <div>
-            <span className="text-zinc-600 block uppercase text-[9px]">DESIGN SYSTEM:</span>
-            <span className="text-white">NU-BRUTALIST // SWISS EDITORIAL 12COL</span>
-          </div>
-
-          <div>
-            <span className="text-zinc-600 block uppercase text-[9px]">PRIMARY TYPEFACE:</span>
-            <span className="text-white">BEBAS NEUE / MANROPE / SPACE MONO</span>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-zinc-400 text-[11px]">
           <div>
             <span className="text-zinc-600 block uppercase text-[9px]">LEGAL & COMMERCIAL:</span>
             <div className="flex flex-wrap gap-2 text-[10px] mt-0.5">
