@@ -155,8 +155,17 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
   const id = slugifyFolder(folderName);
   const title = meta?.title || formatFolderTitle(folderName);
 
+  const rootMediaRank = (f: MediaFileItem): number => {
+    if (f.type === 'image') return 0;
+    if (f.type === 'video') return 1;
+    if (f.type === 'svg') return 2;
+    if (f.type === 'pdf') return 3;
+    return 4;
+  };
+  const orderedRootFiles = [...rootFiles].sort((a, b) => rootMediaRank(a) - rootMediaRank(b));
+
   const allFiles: MediaFileItem[] = [
-    ...rootFiles,
+    ...orderedRootFiles,
     ...subfolders.flatMap((sf) => sf.files),
   ];
 
@@ -171,8 +180,8 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
     f.type === 'image' || f.type === 'svg' || f.type === 'video' || f.type === 'pdf';
 
   const visualFiles = allFiles.filter(isPlayableOrVisual);
-  const rootRasterFirst = rootFiles.find((f) => f.type === 'image');
-  const rootPdfFirst = rootFiles.find((f) => f.type === 'pdf');
+  const rootRasterFirst = orderedRootFiles.find((f) => f.type === 'image');
+  const rootPdfFirst = orderedRootFiles.find((f) => f.type === 'pdf');
   const anyRasterFirst = allFiles.find((f) => f.type === 'image');
   const anyPdfFirst = allFiles.find((f) => f.type === 'pdf');
   const anySvgFirst = allFiles.find((f) => f.type === 'svg');
@@ -213,8 +222,8 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
 
   const mockups: ProjectMockup[] = [];
 
-  if (rootFiles.some(isPlayableOrVisual)) {
-    const rootMediaUrls = rootFiles.filter(isPlayableOrVisual).map((f) => f.url);
+  if (orderedRootFiles.some(isPlayableOrVisual)) {
+    const rootMediaUrls = orderedRootFiles.filter(isPlayableOrVisual).map((f) => f.url);
     mockups.push({
       title: `${title} Overview`,
       image: rootMediaUrls[0],
