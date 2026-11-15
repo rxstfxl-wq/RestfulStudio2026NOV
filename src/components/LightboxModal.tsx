@@ -172,7 +172,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
 
         {/* Integrated Brand Guide / PDF Reader Bar */}
         {isPdf && (
-          <div className="mt-2 px-2 sm:px-3 py-2 border border-zinc-800 bg-black/70 flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+          <div className="mt-2 px-2 sm:px-3 py-2 border border-zinc-600 bg-[#404040] flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
             {pdfNumPages > 1 ? (
               <div className="flex flex-wrap items-center gap-1.5">
                 <button
@@ -207,7 +207,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                     })}
                   </div>
                 ) : (
-                  <span className="px-2 text-zinc-300 tabular-nums">
+                  <span className="px-2 text-zinc-200 tabular-nums">
                     Page {pdfPage} / {pdfNumPages}
                   </span>
                 )}
@@ -216,14 +216,14 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                   type="button"
                   onClick={() => setPdfPage((p) => Math.min(pdfNumPages, p + 1))}
                   disabled={pdfPage >= pdfNumPages}
-                  className="px-2.5 py-1 border border-zinc-800 bg-zinc-950 text-zinc-300 hover:border-[#D72626] hover:text-white disabled:opacity-40 inline-flex items-center gap-1 cursor-pointer"
+                  className="px-2.5 py-1 border border-[#D72626] animate-red-border-glow bg-zinc-950 text-zinc-200 hover:text-white disabled:opacity-40 inline-flex items-center gap-1 cursor-pointer"
                 >
                   <span>Next Page</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1.5 text-zinc-400 text-[11px] uppercase">
+              <div className="inline-flex items-center gap-1.5 text-zinc-200 text-[11px] uppercase">
                 <FileText className="w-3.5 h-3.5 text-[#D72626]" />
                 <span>PDF Document · 1 Page</span>
               </div>
