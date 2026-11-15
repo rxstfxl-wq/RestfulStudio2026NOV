@@ -10,7 +10,8 @@ export function useProjects() {
   const refreshProjects = useCallback(async () => {
     try {
       const res = await fetch('/api/projects', { cache: 'no-store' });
-      if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
         const data = await res.json();
         if (Array.isArray(data.projects)) {
           setProjects(data.projects);
@@ -18,7 +19,7 @@ export function useProjects() {
         }
       }
     } catch (err) {
-      console.warn('Using static fallback project list:', err);
+      console.warn('Using build-time public/projects-media snapshot:', err);
     } finally {
       setLoading(false);
     }
@@ -30,8 +31,17 @@ export function useProjects() {
     const handleFocus = () => {
       refreshProjects();
     };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        refreshProjects();
+      }
+    };
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [refreshProjects]);
 
   return { projects, loading, lastSyncedAt, refreshProjects };

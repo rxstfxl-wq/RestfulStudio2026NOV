@@ -243,15 +243,13 @@ app.post("/api/visibility", (req, res) => {
   res.json(updated);
 });
 
-// Serve static assets from public & root media folders cleanly
+// Serve static assets from public media folders cleanly
 const publicDir = path.join(process.cwd(), "public");
-const projectsMediaDir = path.join(process.cwd(), "projects-media");
 const publicProjectsMediaDir = path.join(process.cwd(), "public", "projects-media");
 const aboutMediaDir = path.join(process.cwd(), "about-media");
 const publicAboutMediaDir = path.join(process.cwd(), "public", "about-media");
 
 app.use("/projects-media", express.static(publicProjectsMediaDir));
-app.use("/projects-media", express.static(projectsMediaDir));
 app.use("/about-media", express.static(publicAboutMediaDir));
 app.use("/about-media", express.static(aboutMediaDir));
 app.use("/assets", express.static(path.join(publicDir, "assets")));
@@ -280,7 +278,7 @@ app.use((req, res, next) => {
   };
   if (cleanUrl.includes("/projects-media/")) {
     const relativePath = cleanUrl.substring(cleanUrl.indexOf("/projects-media/"));
-    if (trySendFile(publicDir, relativePath) || trySendFile(process.cwd(), relativePath)) {
+    if (trySendFile(publicDir, relativePath)) {
       return;
     }
   }
