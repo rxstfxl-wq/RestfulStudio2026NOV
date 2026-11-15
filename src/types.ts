@@ -77,6 +77,7 @@ export interface Project {
   featured: boolean;
   galleryTitle?: string;
   liveUrl?: string;
+  liveUrlLabel?: string;
 }
 
 export interface ExperienceItem {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { fixImageUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { PdfPagePreview } from './PdfPagePreview';
 
 interface LightboxModalProps {
   imageUrl: string | null;
@@ -50,6 +51,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
   const activeUrl = gallery[currentIndex] || imageUrl;
   const isSvg = isSvgUrl(activeUrl);
   const isVideo = isVideoUrl(activeUrl);
+  const isPdf = isPdfUrl(activeUrl);
   const activeFileName = decodeURIComponent(activeUrl.split('/').pop() || title);
 
   return (
@@ -99,6 +101,15 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
               loop
               playsInline
               className="w-auto h-auto max-w-full max-h-[72vh] mx-auto bg-black"
+            />
+          ) : isPdf ? (
+            <PdfPagePreview
+              key={activeUrl}
+              src={activeUrl}
+              alt={activeFileName}
+              eager
+              targetWidth={2200}
+              className="w-auto h-auto max-w-full max-h-[72vh] object-contain mx-auto bg-white"
             />
           ) : (
             <img

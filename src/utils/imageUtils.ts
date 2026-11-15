@@ -54,3 +54,7 @@ export function isSvgUrl(url: string | null | undefined): boolean {
   return /\.svg(\?.*)?$/i.test(url.trim());
 }
 
+export function isPdfUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  return /\.pdf(\?.*)?$/i.test(url.trim());
+}

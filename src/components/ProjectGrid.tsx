@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Project } from '../types';
 import { ArrowUpRight, ArrowLeft, ArrowRight, ChevronRight, RefreshCw, Folder } from 'lucide-react';
-import { fixImageUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { PdfPagePreview } from './PdfPagePreview';
 
 interface ProjectGridProps {
   projects: Project[];
@@ -193,6 +194,7 @@ export const ProjectGrid: React.FC<ProjectGridProps> = ({
                 const isHidden = hiddenProjectIds?.has(project.id);
                 const isSvgHero = isSvgUrl(project.heroImage);
                 const isVideoHero = isVideoUrl(project.heroImage);
+                const isPdfHero = isPdfUrl(project.heroImage);
 
                 return (
                   <article
@@ -219,6 +221,16 @@ export const ProjectGrid: React.FC<ProjectGridProps> = ({
                             playsInline
                             autoPlay
                             preload="metadata"
+                            className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
+                              isHidden ? 'grayscale opacity-40' : ''
+                            }`}
+                          />
+                        ) : isPdfHero ? (
+                          <PdfPagePreview
+                            src={project.heroImage}
+                            alt={project.title}
+                            eager
+                            targetWidth={760}
                             className={`w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105 ${
                               isHidden ? 'grayscale opacity-40' : ''
                             }`}

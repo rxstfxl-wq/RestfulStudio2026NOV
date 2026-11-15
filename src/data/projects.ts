@@ -99,43 +99,12 @@ const REBIRTH_VIDEO_FILES = [
   )
 );
 
-const LBH_ADS_FILES = [
-  '01 2026 January Valentines Offer - Tabletalk 10 x 4 - 100mm x 128mm B.png',
-  '01 2026 January Valentines Offer - Tabletalk 10 x 4 - 100mm x 128mm C_.jpg',
-  '02C Google Ads - Collabs - CHOC Fdn Flipflop Day 2026 A-1.jpg',
-  '02C Google Ads - Collabs - CHOC Fdn Flipflop Day 2026 A.jpg',
-  '05 LBH-2026 - Meetings Mag - June - Aug - Banner - 300w x 600h px.jpg',
-  '05 LBH-2026 - Meetings Mag - June - Aug - Banner - 300w x 600h px.png',
-  '20p Coastal Weekend Nov2025 Google Ads.jpg',
-  'Artboard 1.jpg',
-  'Au Bleu 03 March 2026 - Easter Lunch 2026 - Menu Inserts.jpg',
-  'Au Bleu 05 May 2026 - Mothers Day Buffet 2026 - Menu Inserts P.2 copy 2.jpg',
-  'Celebrations 2026 - Google Ads A2.jpg',
-  'Celebrations 2026 - Google Ads B2.jpg',
-  'Coming Soon - Refurb Flyer A5.jpg',
-  'Contreberg Wine.jpg',
-  'Golden Mondays - Google Ads.jpg',
-  'Golden Mondays A3.jpg',
-  'Golden Mondays Screen.jpg',
-  'LBH Refurb Disclaimer 1 2026 - Google Ads copy.jpg',
-  'Madiba Day Relate - June 2026 1A.jpg',
-  'Madiba Day Relate - June 2026 1C.jpg',
-  'Mambo Italiano Quiz Night - 2026 - Photo Mockup F.png',
-  'Mambo Italiano Quiz Night - 2026 - Photo Mockup G.jpg',
-  'Mambo Italiano Quiz Night - 2026 E.jpg',
-  'Mambo Italiano Quiz Night - 2026 F.jpg',
-  'Meetings Mag A4 Half-Hor - w 5mm Bleed - A3.png',
-  'Odyssey Autumn Print v2 alt 2.jpg',
-  'Odyssey Oct 2025 - 10 x 12 cm - Digital.png',
-  'Restaurant Week Posters.jpg',
-  'Room 254 - April 2026 - Room And View - Landscape - Navy Bed Throw.png',
-  'Tabletalk 2025 Nov Combined 100h x 128w mm.jpg',
-  'Tourism Update - Business Travel v2 NB.jpg',
-  'Tourism Update - Western Cape - June July 2026 - V1 copy 4.png',
-  'Valentines February 2026 - Accommodation Offer - Google Ads.jpg',
-  'Valentines Widget Rooms B.jpg',
-].map((name) =>
-  makeMedia('lbh-official-ads-05', '/projects-media/lbh-official-ads-05', name)
+const LAGOON_BEACH_2026_FILES = Array.from({ length: 37 }, (_, i) =>
+  makeMedia(
+    'lagoon-beach-hotel-2026',
+    '/projects-media/Lagoon Beach Hotel 2026',
+    `LBH - Brand Guide Process Work - 2026 - Spreads ${i + 1}.pdf`
+  )
 );
 
 const LOGOS_FILES = [
@@ -147,20 +116,20 @@ const LOGOS_FILES = [
 export const FALLBACK_PROJECTS: Project[] = [
   buildProjectFromScan(
     {
+      folderName: 'Lagoon Beach Hotel 2026',
+      rootFiles: LAGOON_BEACH_2026_FILES,
+      subfolders: [],
+    },
+    0
+  ),
+  buildProjectFromScan(
+    {
       folderName: 'Rebirth Ateliers',
       rootFiles: REBIRTH_ROOT_FILES,
       subfolders: [
         { folderName: 'RebirthAteliers-Carousel-01', files: REBIRTH_CAROUSEL_FILES },
         { folderName: 'RebirthAteliers-Videos', files: REBIRTH_VIDEO_FILES },
       ],
-    },
-    0
-  ),
-  buildProjectFromScan(
-    {
-      folderName: 'lbh-official-ads-05',
-      rootFiles: LBH_ADS_FILES,
-      subfolders: [],
     },
     1
   ),
@@ -186,3 +155,4 @@ export const FALLBACK_PROJECTS: Project[] = [
 ];
 
 export const PROJECTS: Project[] = FALLBACK_PROJECTS;
+

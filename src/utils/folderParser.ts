@@ -66,13 +66,17 @@ export function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function inferDisciplinesFromName(folderName: string, subfolderNames: string[] = []): DisciplineCategory[] {
-  const combined = `${folderName} ${subfolderNames.join(' ')}`.toLowerCase();
+export function inferDisciplinesFromName(
+  folderName: string,
+  subfolderNames: string[] = [],
+  fileNames: string[] = []
+): DisciplineCategory[] {
+  const combined = `${folderName} ${subfolderNames.join(' ')} ${fileNames.slice(0, 6).join(' ')}`.toLowerCase();
   const matched = new Set<DisciplineCategory>();
 
   if (/(brand|logo|identity|rebirth|mark)/.test(combined)) matched.add('branding');
   if (/(ad|ads|print|poster|flyer|menu|tabletalk|banner|mag|magazine)/.test(combined)) matched.add('print');
-  if (/(guide|manual|editorial|book|monograph|magazine|behance)/.test(combined)) matched.add('editorial');
+  if (/(guide|manual|editorial|book|monograph|magazine|behance|spread)/.test(combined)) matched.add('editorial');
   if (/(web|app|digital|ui|ux|widget|google ads)/.test(combined)) matched.add('digital');
   if (/(pack|cup|bottle|box)/.test(combined)) matched.add('packaging');
   if (/(sign|wayfinding|hotel|room)/.test(combined)) matched.add('signage');
@@ -116,10 +120,22 @@ export interface FolderMetadataOverride {
   strategy?: string;
   solution?: string;
   liveUrl?: string;
+  liveUrlLabel?: string;
   featured?: boolean;
   colorPalette?: Project['colorPalette'];
   typographyUsed?: Project['typographyUsed'];
 }
+
+const DEFAULT_FOLDER_LINKS: Record<string, { label: string; url: string }> = {
+  'canary-e-card': {
+    label: 'Canary Website',
+    url: 'https://ecanary.lovable.app',
+  },
+  'rebirth-ateliers': {
+    label: 'Rebirth Ateliers Website',
+    url: 'https://rebirth-ateliers-4nyw.vercel.app/',
+  },
+};
 
 export interface RawFolderScanInput {
   folderName: string;
@@ -139,28 +155,32 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
   const id = slugifyFolder(folderName);
   const title = meta?.title || formatFolderTitle(folderName);
 
-  const subfolderNames = subfolders.map((s) => s.folderName);
-  const disciplines = meta?.disciplines && meta.disciplines.length > 0
-    ? meta.disciplines
-    : inferDisciplinesFromName(folderName, subfolderNames);
-
-  const category = meta?.category || inferCategoryFromName(folderName);
-
   const allFiles: MediaFileItem[] = [
     ...rootFiles,
     ...subfolders.flatMap((sf) => sf.files),
   ];
 
+  const subfolderNames = subfolders.map((s) => s.folderName);
+  const disciplines = meta?.disciplines && meta.disciplines.length > 0
+    ? meta.disciplines
+    : inferDisciplinesFromName(folderName, subfolderNames, allFiles.map((f) => f.name));
+
+  const category = meta?.category || inferCategoryFromName(folderName);
+
   const isPlayableOrVisual = (f: MediaFileItem) =>
-    f.type === 'image' || f.type === 'svg' || f.type === 'video';
+    f.type === 'image' || f.type === 'svg' || f.type === 'video' || f.type === 'pdf';
 
   const visualFiles = allFiles.filter(isPlayableOrVisual);
   const rootRasterFirst = rootFiles.find((f) => f.type === 'image');
+  const rootPdfFirst = rootFiles.find((f) => f.type === 'pdf');
   const anyRasterFirst = allFiles.find((f) => f.type === 'image');
+  const anyPdfFirst = allFiles.find((f) => f.type === 'pdf');
   const anySvgFirst = allFiles.find((f) => f.type === 'svg');
   const heroImage =
     rootRasterFirst?.url ||
+    rootPdfFirst?.url ||
     anyRasterFirst?.url ||
+    anyPdfFirst?.url ||
     anySvgFirst?.url ||
     visualFiles[0]?.url ||
     '';
@@ -177,6 +197,7 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
       const sfMediaUrls = sfVisualFiles.map((f) => f.url);
       const sfCover =
         sf.files.find((f) => f.type === 'image')?.url ||
+        sf.files.find((f) => f.type === 'pdf')?.url ||
         sf.files.find((f) => f.type === 'svg')?.url ||
         sfMediaUrls[0] ||
         heroImage;
@@ -276,6 +297,7 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
     ],
     featured: meta?.featured ?? index < 3,
     galleryTitle: `${title} Media Archive`,
-    liveUrl: meta?.liveUrl,
+    liveUrl: meta?.liveUrl || DEFAULT_FOLDER_LINKS[id]?.url,
+    liveUrlLabel: meta?.liveUrlLabel || DEFAULT_FOLDER_LINKS[id]?.label,
   };
 }

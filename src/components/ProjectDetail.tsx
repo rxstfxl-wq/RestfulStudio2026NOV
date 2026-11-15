@@ -14,7 +14,8 @@ import {
   Grid,
   Play,
 } from 'lucide-react';
-import { fixImageUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
+import { PdfPagePreview } from './PdfPagePreview';
 
 interface ProjectDetailProps {
   project: Project;
@@ -64,7 +65,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     setShowAllAssets(false);
   }, [activeScope]);
 
-  const isVisualMedia = (type: string) => type === 'image' || type === 'svg' || type === 'video';
+  const isVisualMedia = (type: string) =>
+    type === 'image' || type === 'svg' || type === 'video' || type === 'pdf';
 
   // Root-level media files directly inside public/projects-media/<project>
   const rootMediaUrls = useMemo(
@@ -115,6 +117,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
   const isSvgHero = isSvgUrl(project.heroImage);
   const isVideoHero = isVideoUrl(project.heroImage);
+  const isPdfHero = isPdfUrl(project.heroImage);
 
   const currentIndex = allProjects.findIndex((p) => p.id === project.id);
   const prevProject =
@@ -138,6 +141,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const fileName = decodeURIComponent(mediaUrl.split('/').pop() || `Asset ${indexInScope + 1}`);
     const isSvg = isSvgUrl(mediaUrl);
     const isVideo = isVideoUrl(mediaUrl);
+    const isPdf = isPdfUrl(mediaUrl);
 
     return (
       <button
@@ -167,6 +171,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                 <span>Video</span>
               </div>
             </>
+          ) : isPdf ? (
+            <PdfPagePreview
+              src={mediaUrl}
+              alt={fileName}
+              targetWidth={680}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
           ) : (
             <img
               src={fixImageUrl(mediaUrl)}
@@ -238,6 +249,19 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
             <p className="font-sans text-sm sm:text-base text-zinc-300 font-light leading-relaxed">
               {project.overview}
+              {project.liveUrl && (
+                <>
+                  {' '}
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#D72626] hover:text-white underline underline-offset-4 font-medium transition-colors"
+                  >
+                    {project.liveUrlLabel || 'Visit Website'}
+                  </a>
+                </>
+              )}
             </p>
 
             <div className="grid grid-cols-2 gap-4 border-t border-b border-zinc-800 py-4 font-mono text-xs">
@@ -294,6 +318,14 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     autoPlay
                     preload="metadata"
                     className="w-full h-full object-cover"
+                  />
+                ) : isPdfHero ? (
+                  <PdfPagePreview
+                    src={project.heroImage}
+                    alt={project.title}
+                    eager
+                    targetWidth={1280}
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   />
                 ) : (
                   <img

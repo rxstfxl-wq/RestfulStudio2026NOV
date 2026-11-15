@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { buildFileSystem, FolderNode, FileType } from '../../data/fileSystem';
 import { Project } from '../../types';
-import { fixImageUrl, isSvgUrl, isVideoUrl } from '../../utils/imageUtils';
+import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../../utils/imageUtils';
+import { PdfPagePreview } from '../PdfPagePreview';
 
 interface DesktopExplorerViewProps {
   projects: Project[];
@@ -329,6 +330,7 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                     const isSelected = activeProjectNode?.id === folder.id;
                     const isSvg = isSvgUrl(folder.coverImage);
                     const isVideo = isVideoUrl(folder.coverImage);
+                    const isPdf = isPdfUrl(folder.coverImage);
                     const subCount = folder.subfolders?.length || 0;
                     return (
                       <button
@@ -357,6 +359,13 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                                 playsInline
                                 autoPlay
                                 preload="metadata"
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              />
+                            ) : isPdf ? (
+                              <PdfPagePreview
+                                src={folder.coverImage}
+                                alt={folder.label}
+                                targetWidth={640}
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               />
                             ) : (
@@ -458,7 +467,7 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                     {activeProjectNode.subfolders.map((sub) => {
                       const isOpen = activeSubfolderId === sub.id;
                       const subMedia = (sub.files || [])
-                        .filter((f) => f.type === 'image' || f.type === 'svg' || f.type === 'video')
+                        .filter((f) => f.type === 'image' || f.type === 'svg' || f.type === 'video' || f.type === 'pdf')
                         .map((f) => f.url!);
                       return (
                         <div key={sub.id} className="border border-zinc-800 bg-black/50">
@@ -486,7 +495,7 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                               {sub.files.map((file) => {
                                 const mediaIdx = file.url ? subMedia.indexOf(file.url) : -1;
                                 const canPreview =
-                                  file.type === 'image' || file.type === 'svg' || file.type === 'video';
+                                  file.type === 'image' || file.type === 'svg' || file.type === 'video' || file.type === 'pdf';
                                 return (
                                   <button
                                     key={file.id}
@@ -528,11 +537,11 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                     <div className="space-y-1 max-h-96 overflow-y-auto">
                       {activeProjectNode.files.map((file) => {
                         const rootMedia = (activeProjectNode.files || [])
-                          .filter((f) => f.type === 'image' || f.type === 'svg' || f.type === 'video')
+                          .filter((f) => f.type === 'image' || f.type === 'svg' || f.type === 'video' || f.type === 'pdf')
                           .map((f) => f.url!);
                         const mediaIdx = file.url ? rootMedia.indexOf(file.url) : -1;
                         const canPreview =
-                          file.type === 'image' || file.type === 'svg' || file.type === 'video';
+                          file.type === 'image' || file.type === 'svg' || file.type === 'video' || file.type === 'pdf';
                         return (
                           <button
                             key={file.id}
