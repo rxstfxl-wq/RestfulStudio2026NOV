@@ -25,7 +25,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                   RXSTFXL Studio<span className="text-[#D72626]">.</span>
                 </h1>
 
-                <p className="font-mono text-xs sm:text-sm text-[#D72626] tracking-wider uppercase font-bold">
+                <p className="w-fit bg-[#D72626] text-white px-2.5 py-1 font-mono text-xs sm:text-sm tracking-wider uppercase font-bold">
                   Graphic & Multimedia Designer
                 </p>
 

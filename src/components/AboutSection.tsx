@@ -29,7 +29,7 @@ export const AboutSection: React.FC = () => {
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <h3 className="font-mono text-sm sm:text-base text-[#D72626] font-bold tracking-wider uppercase">
+                  <h3 className="w-fit bg-[#D72626] text-white px-2.5 py-1 font-mono text-sm sm:text-base font-bold tracking-wider uppercase">
                     {AUSTIN_PROFILE.title}
                   </h3>
                   <h4 className="font-mono text-xs sm:text-sm text-zinc-300 font-bold tracking-widest uppercase">
@@ -168,7 +168,7 @@ export const AboutSection: React.FC = () => {
                 {EXPERIENCES.map((exp, index) => (
                   <div key={index} className="bg-zinc-950 border border-zinc-800 p-6 sm:p-8 space-y-3 hover:border-[#D72626] transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between font-mono text-xs gap-2">
-                      <span className="text-[#D72626] font-bold tracking-widest">{exp.year}</span>
+                      <span className="bg-[#5b5b5b] text-white font-bold tracking-widest">{exp.year}</span>
                       <span className="text-zinc-500 uppercase">{exp.location}</span>
                     </div>
                     <h4 className="font-display text-3xl text-white uppercase">{exp.role} — {exp.company}</h4>
