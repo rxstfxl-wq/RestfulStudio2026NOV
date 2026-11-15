@@ -58,3 +58,14 @@ export function isPdfUrl(url: string | null | undefined): boolean {
   if (!url) return false;
   return /\.pdf(\?.*)?$/i.test(url.trim());
 }
+
+export function encodeAssetUrl(url: string | null | undefined): string {
+  const fixed = fixImageUrl(url);
+  if (!fixed) return '';
+  try {
+    return encodeURI(decodeURI(fixed));
+  } catch {
+    return encodeURI(fixed);
+  }
+}
+

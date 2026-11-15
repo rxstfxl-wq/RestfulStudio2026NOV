@@ -2,11 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { FileText } from 'lucide-react';
-import { fixImageUrl } from '../utils/imageUtils';
+import { encodeAssetUrl } from '../utils/imageUtils';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
-const renderedPdfCache = new Map<string, Promise<string>>();
+interface RenderedPdfResult {
+  objectUrl: string;
+  numPages: number;
+}
+
+const renderedPdfCache = new Map<string, Promise<RenderedPdfResult>>();
+const pdfNumPagesCache = new Map<string, number>();
 
 let activeWorkers = 0;
 const MAX_CONCURRENT_RENDERS = 3;
@@ -33,17 +39,12 @@ function runQueued<T>(task: () => Promise<T>): Promise<T> {
   });
 }
 
-function normalizePdfRequestUrl(rawUrl: string): string {
-  const fixed = fixImageUrl(rawUrl);
-  try {
-    return encodeURI(decodeURI(fixed));
-  } catch {
-    return encodeURI(fixed);
-  }
-}
-
-async function renderPdfFirstPageToObjectUrl(rawUrl: string, targetWidth: number): Promise<string> {
-  const requestUrl = normalizePdfRequestUrl(rawUrl);
+async function renderPdfPageToObjectUrl(
+  rawUrl: string,
+  pageNumber: number,
+  targetWidth: number
+): Promise<RenderedPdfResult> {
+  const requestUrl = encodeAssetUrl(rawUrl);
   const loadingTask = pdfjsLib.getDocument({
     url: requestUrl,
     disableAutoFetch: true,
@@ -52,7 +53,11 @@ async function renderPdfFirstPageToObjectUrl(rawUrl: string, targetWidth: number
 
   const pdf = await loadingTask.promise;
   try {
-    const page = await pdf.getPage(1);
+    const numPages = pdf.numPages || 1;
+    pdfNumPagesCache.set(requestUrl, numPages);
+    const safePage = Math.max(1, Math.min(pageNumber, numPages));
+    const page = await pdf.getPage(safePage);
+
     try {
       const baseViewport = page.getViewport({ scale: 1 });
       const scale = Math.min(3.5, Math.max(0.4, targetWidth / Math.max(1, baseViewport.width)));
@@ -93,7 +98,7 @@ async function renderPdfFirstPageToObjectUrl(rawUrl: string, targetWidth: number
 
       canvas.width = 0;
       canvas.height = 0;
-      return objectUrl;
+      return { objectUrl, numPages };
     } finally {
       page.cleanup();
     }
@@ -102,13 +107,19 @@ async function renderPdfFirstPageToObjectUrl(rawUrl: string, targetWidth: number
   }
 }
 
-function getCachedPdfPreview(rawUrl: string, targetWidth: number): Promise<string> {
-  const normalizedUrl = normalizePdfRequestUrl(rawUrl);
-  const key = `${normalizedUrl}::${targetWidth}`;
+function getCachedPdfPreview(
+  rawUrl: string,
+  pageNumber: number,
+  targetWidth: number
+): Promise<RenderedPdfResult> {
+  const normalizedUrl = encodeAssetUrl(rawUrl);
+  const key = `${normalizedUrl}::p=${pageNumber}::w=${targetWidth}`;
   const existing = renderedPdfCache.get(key);
   if (existing) return existing;
 
-  const promise = runQueued(() => renderPdfFirstPageToObjectUrl(normalizedUrl, targetWidth)).catch((err) => {
+  const promise = runQueued(() =>
+    renderPdfPageToObjectUrl(normalizedUrl, pageNumber, targetWidth)
+  ).catch((err) => {
     renderedPdfCache.delete(key);
     throw err;
   });
@@ -117,25 +128,44 @@ function getCachedPdfPreview(rawUrl: string, targetWidth: number): Promise<strin
   return promise;
 }
 
+export function prefetchPdfPage(rawUrl: string, pageNumber: number, targetWidth = 2200): void {
+  if (!rawUrl || pageNumber < 1) return;
+  getCachedPdfPreview(rawUrl, pageNumber, targetWidth).catch(() => {});
+}
+
 interface PdfPagePreviewProps {
   src: string;
   alt: string;
+  pageNumber?: number;
   className?: string;
   targetWidth?: number;
   eager?: boolean;
+  onDocumentLoad?: (numPages: number) => void;
 }
 
 export const PdfPagePreview: React.FC<PdfPagePreviewProps> = ({
   src,
   alt,
+  pageNumber = 1,
   className = 'w-full h-full object-cover',
   targetWidth = 720,
   eager = false,
+  onDocumentLoad,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [shouldLoad, setShouldLoad] = useState<boolean>(eager);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [hasError, setHasError] = useState<boolean>(false);
+  const onDocumentLoadRef = useRef(onDocumentLoad);
+  onDocumentLoadRef.current = onDocumentLoad;
+
+  useEffect(() => {
+    const normalized = encodeAssetUrl(src);
+    const cachedCount = pdfNumPagesCache.get(normalized);
+    if (cachedCount && onDocumentLoadRef.current) {
+      onDocumentLoadRef.current(cachedCount);
+    }
+  }, [src]);
 
   useEffect(() => {
     setHasError(false);
@@ -163,17 +193,20 @@ export const PdfPagePreview: React.FC<PdfPagePreviewProps> = ({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [src, eager]);
+  }, [src, pageNumber, eager]);
 
   useEffect(() => {
     if (!shouldLoad || !src) return;
     let cancelled = false;
 
-    getCachedPdfPreview(src, targetWidth)
-      .then((url) => {
+    getCachedPdfPreview(src, pageNumber, targetWidth)
+      .then((result) => {
         if (!cancelled) {
-          setPreviewUrl(url);
+          setPreviewUrl(result.objectUrl);
           setHasError(false);
+          if (onDocumentLoadRef.current) {
+            onDocumentLoadRef.current(result.numPages);
+          }
         }
       })
       .catch(() => {
@@ -185,7 +218,7 @@ export const PdfPagePreview: React.FC<PdfPagePreviewProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [shouldLoad, src, targetWidth]);
+  }, [shouldLoad, src, pageNumber, targetWidth]);
 
   if (hasError) {
     return (
@@ -209,7 +242,7 @@ export const PdfPagePreview: React.FC<PdfPagePreviewProps> = ({
       >
         <FileText className="w-6 h-6 text-zinc-600" />
         <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
-          Rendering Spread...
+          Rendering Page {pageNumber}...
         </span>
       </div>
     );

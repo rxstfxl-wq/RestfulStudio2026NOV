@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Grid,
   Play,
+  FileText,
 } from 'lucide-react';
 import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../utils/imageUtils';
 import { PdfPagePreview } from './PdfPagePreview';
@@ -49,6 +50,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
   const [expandedSubIds, setExpandedSubIds] = useState<Set<string>>(() => new Set());
   const [page, setPage] = useState<number>(1);
   const [showAllAssets, setShowAllAssets] = useState<boolean>(false);
+  const [pdfPageCounts, setPdfPageCounts] = useState<Record<string, number>>({});
 
   const isHidden = hiddenProjectIds?.has(project.id);
 
@@ -172,12 +174,25 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
               </div>
             </>
           ) : isPdf ? (
-            <PdfPagePreview
-              src={mediaUrl}
-              alt={fileName}
-              targetWidth={680}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+            <>
+              <PdfPagePreview
+                src={mediaUrl}
+                alt={fileName}
+                targetWidth={680}
+                onDocumentLoad={(numPages) => {
+                  setPdfPageCounts((prev) =>
+                    prev[mediaUrl] === numPages ? prev : { ...prev, [mediaUrl]: numPages }
+                  );
+                }}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              {pdfPageCounts[mediaUrl] > 1 && (
+                <div className="absolute top-2 left-2 bg-black/85 border border-zinc-700 px-2 py-0.5 font-mono text-[10px] text-white inline-flex items-center gap-1 uppercase">
+                  <FileText className="w-3 h-3 text-[#D72626]" />
+                  <span>PDF · {pdfPageCounts[mediaUrl]} Pages</span>
+                </div>
+              )}
+            </>
           ) : (
             <img
               src={fixImageUrl(mediaUrl)}

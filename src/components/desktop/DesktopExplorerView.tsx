@@ -15,10 +15,11 @@ import {
   Eye,
   SlidersHorizontal,
   RefreshCw,
+  ExternalLink,
 } from 'lucide-react';
 import { buildFileSystem, FolderNode, FileType } from '../../data/fileSystem';
 import { Project } from '../../types';
-import { fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../../utils/imageUtils';
+import { encodeAssetUrl, fixImageUrl, isPdfUrl, isSvgUrl, isVideoUrl } from '../../utils/imageUtils';
 import { PdfPagePreview } from '../PdfPagePreview';
 
 interface DesktopExplorerViewProps {
@@ -513,6 +514,18 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0 text-zinc-500 ml-2">
                                       <span className="tabular-nums">{file.size}</span>
+                                      {file.type === 'pdf' && file.url && (
+                                        <a
+                                          href={encodeAssetUrl(file.url)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          onClick={(e) => e.stopPropagation()}
+                                          title="Open PDF in new tab"
+                                          className="text-zinc-400 hover:text-[#D72626] transition-colors"
+                                        >
+                                          <ExternalLink className="w-3.5 h-3.5" />
+                                        </a>
+                                      )}
                                       <Eye className="w-3.5 h-3.5 text-zinc-400" />
                                     </div>
                                   </button>
@@ -559,6 +572,18 @@ export const DesktopExplorerView: React.FC<DesktopExplorerViewProps> = ({
                             </div>
                             <div className="flex items-center gap-2 shrink-0 text-zinc-500 ml-2">
                               <span className="tabular-nums">{file.size}</span>
+                              {file.type === 'pdf' && file.url && (
+                                <a
+                                  href={encodeAssetUrl(file.url)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  title="Open PDF in new tab"
+                                  className="text-zinc-400 hover:text-[#D72626] transition-colors"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                              )}
                               <Eye className="w-3.5 h-3.5 text-zinc-400" />
                             </div>
                           </button>
