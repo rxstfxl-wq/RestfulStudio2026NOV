@@ -137,6 +137,10 @@ const DEFAULT_FOLDER_LINKS: Record<string, { label: string; url: string }> = {
   },
 };
 
+const DEFAULT_FOLDER_COVERS: Record<string, string> = {
+  seabreeze: '/projects-media/Seabreeze/Seabreeze Logo/Asset 4.png',
+};
+
 export interface RawFolderScanInput {
   folderName: string;
   rootFiles: MediaFileItem[];
@@ -180,12 +184,16 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
     f.type === 'image' || f.type === 'svg' || f.type === 'video' || f.type === 'pdf';
 
   const visualFiles = allFiles.filter(isPlayableOrVisual);
+  const preferredCoverUrl = DEFAULT_FOLDER_COVERS[id]
+    ? allFiles.find((f) => f.url === DEFAULT_FOLDER_COVERS[id])?.url
+    : undefined;
   const rootRasterFirst = orderedRootFiles.find((f) => f.type === 'image');
   const rootPdfFirst = orderedRootFiles.find((f) => f.type === 'pdf');
   const anyRasterFirst = allFiles.find((f) => f.type === 'image');
   const anyPdfFirst = allFiles.find((f) => f.type === 'pdf');
   const anySvgFirst = allFiles.find((f) => f.type === 'svg');
   const heroImage =
+    preferredCoverUrl ||
     rootRasterFirst?.url ||
     rootPdfFirst?.url ||
     anyRasterFirst?.url ||

@@ -12,10 +12,12 @@ export const AUSTIN_PROFILE = {
   title: 'GRAPHIC DESIGNER & BRAND DESIGNER',
   subtitle: 'FOUNDER & CREATIVE DIRECTOR — RXSTFXL STUDIO',
   bioLines: [
-    'I am a multidisciplinary Graphic Designer & Brand Designer with experience creating distinctive visual identities, marketing campaigns, editorial publications, digital experiences, and print collateral.',
-    'My work combines strategic thinking with contemporary design to build brands that are both commercially effective and visually memorable.',
-    'With experience across hospitality, marketing, publishing, and digital design, I enjoy transforming ideas into purposeful visual communication through branding, typography, layout, motion, and user experience.',
-    'Currently, I work as the Solo Graphic Designer at Lagoon Beach Hotel & Spa, leading creative output across multiple hospitality brands while building my professional portfolio under RXSTFXL.'
+    "I'm a multidisciplinary Brand & Graphic Designer specialising in brand identity, marketing, UX/UI and digital design.",
+    'I work with businesses, established brands and creative teams to create distinctive visual identities, impactful campaigns and purposeful digital experiences across branding, advertising, editorial, web and print.',
+    'Combining strategic thinking, contemporary design and a background in Software Development, I bridge creative direction with practical implementation.',
+    'Through my independent creative practice, RXSTFXL, I offer freelance and contracted design services, while remaining open to studio and agency collaborations. I bring a flexible, considered approach to delivering professional, studio-quality creative work.',
+    'Good design should look distinctive, communicate clearly and work effectively.',
+    'Available for freelance, contract and full-time opportunities, locally and remotely.'
   ],
   location: 'Cape Town, South Africa',
   availability: 'Available for Freelance / Full Time / On-site / Hybrid / Remote',

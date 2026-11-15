@@ -71,17 +71,18 @@ export const ClientMarksSection: React.FC<ClientMarksSectionProps> = ({
 }) => {
   const [logoTones, setLogoTones] = useState<Record<string, LogoTone>>({});
 
-  // Collect real SVG logo assets from discovered project folders + studio logo
-  const svgFiles = projects.flatMap((p) =>
-    p.files
-      .filter((f) => f.type === 'svg')
-      .map((f) => ({
-        id: f.id,
-        name: f.name.replace(/\.svg$/i, '').replace(/[-_]+/g, ' '),
-        logo: f.url,
-        project: p,
-      }))
-  );
+  // Collect real SVG logo assets: all marks from the dedicated `logos` folder,
+  // and only the primary (first) SVG mark from any individual project folder
+  const svgFiles = projects.flatMap((p) => {
+    const projectSvgs = p.files.filter((f) => f.type === 'svg');
+    const selectedSvgs = p.id === 'logos' ? projectSvgs : projectSvgs.slice(0, 1);
+    return selectedSvgs.map((f) => ({
+      id: f.id,
+      name: f.name.replace(/\.svg$/i, '').replace(/[-_]+/g, ' '),
+      logo: f.url,
+      project: p,
+    }));
+  });
 
   const marks = [
     {
