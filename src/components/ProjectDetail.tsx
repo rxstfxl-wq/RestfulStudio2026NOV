@@ -81,6 +81,9 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
 
   // Visible subfolder sub-libraries inside public/projects-media/<project>/<subfolder>
   const allSubfolders = project.subfolders || [];
+  const isLeadingSubfolder = (sf: ProjectSubfolder) =>
+    project.id === 'rebirth-ateliers' && /brand[\s-_]*guide/i.test(sf.folderName);
+
   const visibleSubfolders: ProjectSubfolder[] = useMemo(
     () =>
       allSubfolders.filter((sf) => {
@@ -90,16 +93,41 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     [allSubfolders, project.id, isAuthorLoggedIn, hiddenSubProjectKeys]
   );
 
-  // Combined ordered media list across root + visible sub-libraries
+  const leadingAllSubfolders = useMemo(
+    () => allSubfolders.filter(isLeadingSubfolder),
+    [allSubfolders, project.id]
+  );
+  const trailingAllSubfolders = useMemo(
+    () => allSubfolders.filter((sf) => !isLeadingSubfolder(sf)),
+    [allSubfolders, project.id]
+  );
+
+  const leadingVisibleSubfolders = useMemo(
+    () => visibleSubfolders.filter(isLeadingSubfolder),
+    [visibleSubfolders, project.id]
+  );
+  const trailingVisibleSubfolders = useMemo(
+    () => visibleSubfolders.filter((sf) => !isLeadingSubfolder(sf)),
+    [visibleSubfolders, project.id]
+  );
+
+  // Combined ordered media list across leading sub-libraries, root, and remaining sub-libraries
   const allCombinedMedia = useMemo(() => {
     if (allSubfolders.length === 0) {
       return project.files.filter((f) => isVisualMedia(f.type)).map((f) => f.url);
     }
     return [
+      ...leadingVisibleSubfolders.flatMap((sf) => sf.images),
       ...rootMediaUrls,
-      ...visibleSubfolders.flatMap((sf) => sf.images),
+      ...trailingVisibleSubfolders.flatMap((sf) => sf.images),
     ];
-  }, [allSubfolders.length, project.files, rootMediaUrls, visibleSubfolders]);
+  }, [
+    allSubfolders.length,
+    project.files,
+    leadingVisibleSubfolders,
+    rootMediaUrls,
+    trailingVisibleSubfolders,
+  ]);
 
   // Isolated media list when viewing a single scope (no subfolders, 'root', or one sub-library)
   const isolatedSubfolder = visibleSubfolders.find((sf) => sf.id === activeScope) || null;
@@ -214,6 +242,95 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
           </span>
         </div>
       </button>
+    );
+  };
+
+  const renderSubfolderFilterButton = (sf: ProjectSubfolder) => {
+    const subKey = `${project.id}__sub_${sf.folderName}`;
+    const isSubHidden = hiddenSubProjectKeys?.has(subKey);
+    if (!isAuthorLoggedIn && isSubHidden) return null;
+
+    const active = activeScope === sf.id;
+    return (
+      <div key={sf.id} className="inline-flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setActiveScope(sf.id)}
+          className={`min-h-[40px] px-3.5 py-2 border font-mono text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-colors cursor-pointer ${
+            active
+              ? 'border-[#D72626] bg-[#D72626]/15 text-white font-bold'
+              : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white'
+          }`}
+        >
+          <Folder className="w-3.5 h-3.5 text-[#D72626]" />
+          <span>{sf.title}</span>
+          <span className="text-zinc-500 tabular-nums">({sf.images.length})</span>
+        </button>
+        {isAuthorLoggedIn && onToggleHideSubProject && (
+          <button
+            type="button"
+            onClick={() => onToggleHideSubProject(subKey)}
+            className="min-h-[40px] px-2 border border-zinc-800 font-mono text-[10px] text-zinc-400 hover:text-white cursor-pointer"
+          >
+            {isSubHidden ? 'Show' : 'Hide'}
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const renderSubfolderSection = (sf: ProjectSubfolder) => {
+    const isExpanded = expandedSubIds.has(sf.id);
+    const previewLimit = 8;
+    const needsExpand = sf.images.length > previewLimit;
+    const visibleItems =
+      needsExpand && !isExpanded ? sf.images.slice(0, previewLimit) : sf.images;
+
+    return (
+      <section
+        key={sf.id}
+        className="border border-zinc-800/90 bg-zinc-950/40 p-4 sm:p-5 space-y-4"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 font-mono text-xs">
+              <Folder className="w-4 h-4 text-[#D72626] shrink-0" />
+              <span className="text-white font-bold uppercase tracking-wider truncate">
+                {sf.title}
+              </span>
+              <span className="text-zinc-500 tabular-nums shrink-0">
+                ({sf.images.length} {sf.images.length === 1 ? 'asset' : 'assets'})
+              </span>
+            </div>
+            <span className="font-mono text-[10px] text-zinc-500 block mt-0.5 truncate">
+              Sub-library · {project.folderName}/{sf.folderName}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 font-mono text-[11px]">
+            {needsExpand && (
+              <button
+                type="button"
+                onClick={() => toggleSubExpanded(sf.id)}
+                className="px-3 py-1.5 border border-zinc-800 hover:border-[#D72626] text-zinc-300 hover:text-white uppercase cursor-pointer"
+              >
+                {isExpanded ? 'Show Less' : `Expand All (${sf.images.length})`}
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setActiveScope(sf.id)}
+              className="px-3 py-1.5 border border-zinc-800 hover:border-[#D72626] text-[#D72626] uppercase font-bold cursor-pointer"
+            >
+              Open Sub-Library
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {visibleItems.map((url, idx) => renderMediaCard(url, idx, sf.images))}
+        </div>
+      </section>
     );
   };
 
@@ -414,6 +531,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     <span className="text-zinc-500 tabular-nums">({allCombinedMedia.length})</span>
                   </button>
 
+                  {leadingAllSubfolders.map(renderSubfolderFilterButton)}
+
                   {rootMediaUrls.length > 0 && (
                     <button
                       type="button"
@@ -430,45 +549,16 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     </button>
                   )}
 
-                  {allSubfolders.map((sf) => {
-                    const subKey = `${project.id}__sub_${sf.folderName}`;
-                    const isSubHidden = hiddenSubProjectKeys?.has(subKey);
-                    if (!isAuthorLoggedIn && isSubHidden) return null;
-
-                    const active = activeScope === sf.id;
-                    return (
-                      <div key={sf.id} className="inline-flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setActiveScope(sf.id)}
-                          className={`min-h-[40px] px-3.5 py-2 border font-mono text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-colors cursor-pointer ${
-                            active
-                              ? 'border-[#D72626] bg-[#D72626]/15 text-white font-bold'
-                              : 'border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-white'
-                          }`}
-                        >
-                          <Folder className="w-3.5 h-3.5 text-[#D72626]" />
-                          <span>{sf.title}</span>
-                          <span className="text-zinc-500 tabular-nums">({sf.images.length})</span>
-                        </button>
-                        {isAuthorLoggedIn && onToggleHideSubProject && (
-                          <button
-                            type="button"
-                            onClick={() => onToggleHideSubProject(subKey)}
-                            className="min-h-[40px] px-2 border border-zinc-800 font-mono text-[10px] text-zinc-400 hover:text-white cursor-pointer"
-                          >
-                            {isSubHidden ? 'Show' : 'Hide'}
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                  {trailingAllSubfolders.map(renderSubfolderFilterButton)}
                 </div>
               )}
 
               {/* Grouped "All Media" view when subfolders exist */}
               {allSubfolders.length > 0 && activeScope === 'all' ? (
                 <div className="space-y-10">
+                  {/* Leading Brand Guide Sub-Libraries rendered first */}
+                  {leadingVisibleSubfolders.map(renderSubfolderSection)}
+
                   {/* Root / Main Folder Section (only if project also has top-level files) */}
                   {rootMediaUrls.length > 0 && (
                     <section className="space-y-4">
@@ -499,61 +589,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
                     </section>
                   )}
 
-                  {/* Each Subfolder rendered explicitly as an interactive Sub-Library */}
-                  {visibleSubfolders.map((sf) => {
-                    const isExpanded = expandedSubIds.has(sf.id);
-                    const previewLimit = 8;
-                    const needsExpand = sf.images.length > previewLimit;
-                    const visibleItems =
-                      needsExpand && !isExpanded ? sf.images.slice(0, previewLimit) : sf.images;
-
-                    return (
-                      <section
-                        key={sf.id}
-                        className="border border-zinc-800/90 bg-zinc-950/40 p-4 sm:p-5 space-y-4"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 font-mono text-xs">
-                              <Folder className="w-4 h-4 text-[#D72626] shrink-0" />
-                              <span className="text-white font-bold uppercase tracking-wider truncate">
-                                {sf.title}
-                              </span>
-                              <span className="text-zinc-500 tabular-nums shrink-0">
-                                ({sf.images.length} {sf.images.length === 1 ? 'asset' : 'assets'})
-                              </span>
-                            </div>
-                            <span className="font-mono text-[10px] text-zinc-500 block mt-0.5 truncate">
-                              Sub-library · {project.folderName}/{sf.folderName}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 font-mono text-[11px]">
-                            {needsExpand && (
-                              <button
-                                type="button"
-                                onClick={() => toggleSubExpanded(sf.id)}
-                                className="px-3 py-1.5 border border-zinc-800 hover:border-[#D72626] text-zinc-300 hover:text-white uppercase cursor-pointer"
-                              >
-                                {isExpanded ? 'Show Less' : `Expand All (${sf.images.length})`}
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => setActiveScope(sf.id)}
-                              className="px-3 py-1.5 border border-zinc-800 hover:border-[#D72626] text-[#D72626] uppercase font-bold cursor-pointer"
-                            >
-                              Open Sub-Library
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                          {visibleItems.map((url, idx) => renderMediaCard(url, idx, sf.images))}
-                        </div>
-                      </section>
-                    );
-                  })}
+                  {/* Remaining Subfolders rendered explicitly as interactive Sub-Libraries */}
+                  {trailingVisibleSubfolders.map(renderSubfolderSection)}
                 </div>
               ) : (
                 /* Focused / Single-Folder / Isolated Sub-Library Paginated View */
