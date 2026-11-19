@@ -72,17 +72,28 @@ export const ClientMarksSection: React.FC<ClientMarksSectionProps> = ({
   const [logoTones, setLogoTones] = useState<Record<string, LogoTone>>({});
 
   // Collect real SVG logo assets: all marks from the dedicated `logos` folder,
-  // and only the primary (first) SVG mark from any individual project folder
-  const svgFiles = projects.flatMap((p) => {
+  // and only the primary (first) SVG mark from any individual project folder,
+  // deduplicated by file URL (preferring the project's own case study when clicked).
+  const marksByUrl = new Map<
+    string,
+    { id: string; name: string; logo: string; project: Project }
+  >();
+  for (const p of projects) {
     const projectSvgs = p.files.filter((f) => f.type === 'svg');
     const selectedSvgs = p.id === 'logos' ? projectSvgs : projectSvgs.slice(0, 1);
-    return selectedSvgs.map((f) => ({
-      id: f.id,
-      name: f.name.replace(/\.svg$/i, '').replace(/[-_]+/g, ' '),
-      logo: f.url,
-      project: p,
-    }));
-  });
+    for (const f of selectedSvgs) {
+      const existing = marksByUrl.get(f.url);
+      if (!existing || (existing.project.id === 'logos' && p.id !== 'logos')) {
+        marksByUrl.set(f.url, {
+          id: existing?.id || f.id,
+          name: f.name.replace(/\.svg$/i, '').replace(/[-_]+/g, ' '),
+          logo: f.url,
+          project: p,
+        });
+      }
+    }
+  }
+  const svgFiles = Array.from(marksByUrl.values());
 
   const marks = [
     {

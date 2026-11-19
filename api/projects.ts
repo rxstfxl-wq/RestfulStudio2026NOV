@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import {
-  buildProjectFromScan,
+  buildProjectsFromScans,
   FolderMetadataOverride,
   formatFileSize,
   RawFolderScanInput,
@@ -87,7 +87,7 @@ export default function handler(req: any, res: any) {
       .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
       .sort((a, b) => naturalSort(a.name, b.name));
 
-    const projects: Project[] = [];
+    const scans: RawFolderScanInput[] = [];
 
     for (const folderEntry of topEntries) {
       const folderName = folderEntry.name;
@@ -144,12 +144,11 @@ export default function handler(req: any, res: any) {
       }
 
       if (rootFiles.length > 0 || subfolders.some((sf) => sf.files.length > 0)) {
-        projects.push(
-          buildProjectFromScan({ folderName, rootFiles, subfolders, meta }, projects.length)
-        );
+        scans.push({ folderName, rootFiles, subfolders, meta });
       }
     }
 
+    const projects: Project[] = buildProjectsFromScans(scans);
     return res.status(200).json({ projects, scannedAt: Date.now() });
   } catch (err) {
     console.error('Error scanning projects-media:', err);

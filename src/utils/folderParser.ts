@@ -141,6 +141,10 @@ const DEFAULT_FOLDER_COVERS: Record<string, string> = {
   seabreeze: '/projects-media/Seabreeze/Seabreeze Logo/Asset 4.png',
 };
 
+const SHARED_FOLDER_FILES: Record<string, string[]> = {
+  logos: ['/projects-media/Seabreeze/Seabreeze Logo/Seabreeze logo_1.svg'],
+};
+
 export interface RawFolderScanInput {
   folderName: string;
   rootFiles: MediaFileItem[];
@@ -317,4 +321,57 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
     liveUrl: meta?.liveUrl || DEFAULT_FOLDER_LINKS[id]?.url,
     liveUrlLabel: meta?.liveUrlLabel || DEFAULT_FOLDER_LINKS[id]?.label,
   };
+}
+
+export function buildProjectsFromScans(scans: RawFolderScanInput[]): Project[] {
+  const filesByUrl = new Map<string, MediaFileItem>();
+  for (const scan of scans) {
+    for (const file of scan.rootFiles) {
+      filesByUrl.set(file.url, file);
+    }
+    for (const sf of scan.subfolders) {
+      for (const file of sf.files) {
+        filesByUrl.set(file.url, file);
+      }
+    }
+  }
+
+  return scans.map((scan, index) => {
+    const projectId = slugifyFolder(scan.folderName);
+    const sharedUrls = SHARED_FOLDER_FILES[projectId];
+    if (!sharedUrls || sharedUrls.length === 0) {
+      return buildProjectFromScan(scan, index);
+    }
+
+    const existingUrls = new Set<string>([
+      ...scan.rootFiles.map((f) => f.url),
+      ...scan.subfolders.flatMap((sf) => sf.files.map((f) => f.url)),
+    ]);
+
+    const extraRootFiles: MediaFileItem[] = [];
+    for (const url of sharedUrls) {
+      if (existingUrls.has(url)) continue;
+      const sourceFile = filesByUrl.get(url);
+      if (sourceFile) {
+        extraRootFiles.push({
+          ...sourceFile,
+          id: `${projectId}--shared--${slugifyFolder(sourceFile.name)}`,
+          subfolder: undefined,
+        });
+        existingUrls.add(url);
+      }
+    }
+
+    if (extraRootFiles.length === 0) {
+      return buildProjectFromScan(scan, index);
+    }
+
+    return buildProjectFromScan(
+      {
+        ...scan,
+        rootFiles: [...scan.rootFiles, ...extraRootFiles],
+      },
+      index
+    );
+  });
 }

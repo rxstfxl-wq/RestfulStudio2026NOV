@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import {
-  buildProjectFromScan,
+  buildProjectsFromScans,
   FolderMetadataOverride,
   formatFileSize,
   RawFolderScanInput,
@@ -127,9 +127,9 @@ function scanProjectsMediaDirectory(): Project[] {
     .filter((e) => e.isDirectory() && !e.name.startsWith("."))
     .sort((a, b) => naturalSort(a.name, b.name));
 
-  const projects: Project[] = [];
+  const scans: RawFolderScanInput[] = [];
 
-  topEntries.forEach((folderEntry, idx) => {
+  topEntries.forEach((folderEntry) => {
     const folderName = folderEntry.name;
     const folderPath = path.join(mediaRoot, folderName);
     const projectId = slugifyFolder(folderName);
@@ -191,20 +191,16 @@ function scanProjectsMediaDirectory(): Project[] {
 
     const hasAnyMedia = rootFiles.length > 0 || subfolders.some((sf) => sf.files.length > 0);
     if (hasAnyMedia) {
-      const project = buildProjectFromScan(
-        {
-          folderName,
-          rootFiles,
-          subfolders,
-          meta,
-        },
-        projects.length
-      );
-      projects.push(project);
+      scans.push({
+        folderName,
+        rootFiles,
+        subfolders,
+        meta,
+      });
     }
   });
 
-  return projects;
+  return buildProjectsFromScans(scans);
 }
 
 // Dynamic API endpoint returning all project folders inside public/projects-media
