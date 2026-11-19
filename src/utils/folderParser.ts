@@ -213,6 +213,11 @@ export function buildProjectFromScan(input: RawFolderScanInput, index: number): 
 
   const parsedSubfolders: ProjectSubfolder[] = subfolders
     .filter((sf) => sf.files.length > 0)
+    .sort((a, b) => {
+      const aBrandGuide = /brand[\s-_]*guide/i.test(a.folderName) ? 0 : 1;
+      const bBrandGuide = /brand[\s-_]*guide/i.test(b.folderName) ? 0 : 1;
+      return aBrandGuide - bBrandGuide;
+    })
     .map((sf) => {
       const sfVisualFiles = sf.files.filter(isPlayableOrVisual);
       const sfMediaUrls = sfVisualFiles.map((f) => f.url);
