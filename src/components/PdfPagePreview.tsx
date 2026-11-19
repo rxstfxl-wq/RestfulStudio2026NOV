@@ -39,19 +39,42 @@ function runQueued<T>(task: () => Promise<T>): Promise<T> {
   });
 }
 
+async function openPdfLoadingTask(requestUrl: string) {
+  const urlTask = pdfjsLib.getDocument({
+    url: requestUrl,
+    disableAutoFetch: true,
+    disableStream: false,
+  });
+
+  try {
+    const pdf = await urlTask.promise;
+    return { loadingTask: urlTask, pdf };
+  } catch {
+    try {
+      await urlTask.destroy();
+    } catch {}
+
+    const response = await fetch(requestUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PDF (${response.status})`);
+    }
+    const buffer = await response.arrayBuffer();
+    const dataTask = pdfjsLib.getDocument({
+      data: new Uint8Array(buffer),
+    });
+    const pdf = await dataTask.promise;
+    return { loadingTask: dataTask, pdf };
+  }
+}
+
 async function renderPdfPageToObjectUrl(
   rawUrl: string,
   pageNumber: number,
   targetWidth: number
 ): Promise<RenderedPdfResult> {
   const requestUrl = encodeAssetUrl(rawUrl);
-  const loadingTask = pdfjsLib.getDocument({
-    url: requestUrl,
-    disableAutoFetch: true,
-    disableStream: false,
-  });
+  const { loadingTask, pdf } = await openPdfLoadingTask(requestUrl);
 
-  const pdf = await loadingTask.promise;
   try {
     const numPages = pdf.numPages || 1;
     pdfNumPagesCache.set(requestUrl, numPages);

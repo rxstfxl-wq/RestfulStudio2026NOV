@@ -173,6 +173,8 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const isVideo = isVideoUrl(mediaUrl);
     const isPdf = isPdfUrl(mediaUrl);
 
+    const isBrandGuidePdf = isPdf && /brand[\s-_]*guide/i.test(`${mediaUrl} ${fileName}`);
+
     return (
       <button
         key={`${mediaUrl}-${indexInScope}`}
@@ -182,7 +184,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
       >
         <div
           className={`relative aspect-[4/3] w-full overflow-hidden flex items-center justify-center ${
-            isSvg ? 'bg-[#F2F2E9]' : 'bg-black'
+            isSvg ? 'bg-[#F2F2E9]' : isBrandGuidePdf ? 'bg-zinc-950 p-2' : 'bg-black'
           }`}
         >
           {isVideo ? (
@@ -206,13 +208,18 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
               <PdfPagePreview
                 src={mediaUrl}
                 alt={fileName}
-                targetWidth={680}
+                eager={isBrandGuidePdf}
+                targetWidth={isBrandGuidePdf ? 840 : 680}
                 onDocumentLoad={(numPages) => {
                   setPdfPageCounts((prev) =>
                     prev[mediaUrl] === numPages ? prev : { ...prev, [mediaUrl]: numPages }
                   );
                 }}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className={`w-full h-full transition-transform duration-300 ${
+                  isBrandGuidePdf
+                    ? 'object-contain group-hover:scale-[1.03]'
+                    : 'object-cover group-hover:scale-105'
+                }`}
               />
               {pdfPageCounts[mediaUrl] > 1 && (
                 <div className="absolute top-2 left-2 bg-black/85 border border-zinc-700 px-2 py-0.5 font-mono text-[10px] text-white inline-flex items-center gap-1 uppercase">
@@ -285,11 +292,13 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
     const needsExpand = sf.images.length > previewLimit;
     const visibleItems =
       needsExpand && !isExpanded ? sf.images.slice(0, previewLimit) : sf.images;
+    const isBrandGuideSection = isLeadingSubfolder(sf);
+    const primaryPdfUrl = isBrandGuideSection ? sf.images.find((u) => isPdfUrl(u)) : undefined;
 
     return (
       <section
         key={sf.id}
-        className="border border-zinc-800/90 bg-zinc-950/40 p-4 sm:p-5 space-y-4"
+        className="border border-zinc-800/90 bg-zinc-950/50 p-4 sm:p-5 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
           <div className="min-w-0">
@@ -308,6 +317,20 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({
           </div>
 
           <div className="flex items-center gap-2 font-mono text-[11px]">
+            {primaryPdfUrl && (
+              <button
+                type="button"
+                onClick={() => {
+                  const fileName = decodeURIComponent(primaryPdfUrl.split('/').pop() || sf.title);
+                  const idx = sf.images.indexOf(primaryPdfUrl);
+                  onOpenLightbox(primaryPdfUrl, fileName, sf.images, Math.max(0, idx));
+                }}
+                className="px-3 py-1.5 border border-[#D72626] bg-[#D72626] hover:bg-[#b51d1d] text-white uppercase font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Read Brand Guide</span>
+              </button>
+            )}
             {needsExpand && (
               <button
                 type="button"
